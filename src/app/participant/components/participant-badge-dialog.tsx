@@ -301,7 +301,6 @@ export function ParticipantBadgeDialog({
           >
             Imprimer
           </Button>
-          
           <Button
             variant="outlined"
             color="inherit"

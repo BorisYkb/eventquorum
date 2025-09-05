@@ -304,7 +304,7 @@ export default function EnquetePage() {
 
             <Button
               variant="contained"
-              color="inherit"
+              color="success"
               onClick={handleValider}
               disabled={isSubmitting || !isFormComplete()}
               sx={{
