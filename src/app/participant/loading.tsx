@@ -1,0 +1,8 @@
+//src/app/admin/loading.tsx
+import { LoadingScreen } from 'src/components/loading-screen';
+
+// ----------------------------------------------------------------------
+
+export default function Loading() {
+  return <LoadingScreen />;
+}
