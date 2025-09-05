@@ -163,7 +163,7 @@ export default function SurveyDetailPage() {
             {/* Navigation en chips */}
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
                 <Chip
-                    label="Titre de enquête"
+                    label="Titre de enquête:"
                     color="error"
                     sx={{
                         ...fontSizes.chip,
@@ -173,7 +173,7 @@ export default function SurveyDetailPage() {
                     }}
                 />
                 <Chip
-                    label="Description"
+                    label="Satisfaction du service"
                     variant="outlined"
                     sx={{
                         ...fontSizes.chip,
@@ -182,7 +182,7 @@ export default function SurveyDetailPage() {
                         color: 'text.secondary'
                     }}
                 />
-                <Chip
+                {/* <Chip
                     label="Note obtenue"
                     variant="outlined"
                     sx={{
@@ -211,7 +211,7 @@ export default function SurveyDetailPage() {
                         bgcolor: 'warning.main',
                         color: 'white'
                     }}
-                />
+                /> */}
             </Box>
 
             {/* Titre de l'enquête */}
