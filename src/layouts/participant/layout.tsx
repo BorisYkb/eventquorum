@@ -1,201 +1,171 @@
-//src/layouts/participant/layout.tsx - VERSION CORRIGÉE
+// src/layouts/participant/layout.tsx
 'use client';
 
 import type { Breakpoint } from '@mui/material/styles';
 import type { NavSectionProps } from 'src/components/nav-section';
 
-import { useState } from 'react';
-
 import { merge } from 'es-toolkit';
 import { useBoolean } from 'minimal-shared/hooks';
+import { usePathname } from 'next/navigation';
 
 import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 import { iconButtonClasses } from '@mui/material/IconButton';
+
+import { allLangs } from 'src/locales';
+import { _contacts, _notifications } from 'src/_mock';
 
 import { Logo } from 'src/components/logo';
 import { useSettingsContext } from 'src/components/settings';
 
-import { NavMobile } from './nav-mobile';
-import { VerticalDivider } from './content';
-import { NavVertical } from './nav-vertical';
+import { NavMobile } from '../dashboard/nav-mobile';
+import { VerticalDivider } from '../dashboard/content';
+import { NavVertical } from '../dashboard/nav-vertical';
 import { layoutClasses } from '../core/classes';
-import { _account, _accountParticipant } from '../nav-config-account'; // Import corrigé
+import { NavHorizontal } from '../dashboard/nav-horizontal';
+import { useParticipantAccountData } from '../nav-config-account-participant';
 import { MainSection } from '../core/main-section';
+import { Searchbar } from '../components/searchbar';
+import { _workspaces } from '../nav-config-workspace';
 import { MenuButton } from '../components/menu-button';
 import { HeaderSection } from '../core/header-section';
 import { LayoutSection } from '../core/layout-section';
-import { useParticipantNavData } from '../nav-config-participant-dynamic';
-import { dashboardLayoutVars, dashboardNavColorVars } from './css-vars';
+import { AccountDrawer } from '../components/account-drawer';
+import { SettingsButton } from '../components/settings-button';
+import { LanguagePopover } from '../components/language-popover';
+import { ContactsPopover } from '../components/contacts-popover';
+import { WorkspacesPopover } from '../components/workspaces-popover';
+import { useParticipantNavData } from '../nav-config-participant';
+import { dashboardLayoutVars, dashboardNavColorVars } from '../dashboard/css-vars';
+import { NotificationsDrawer } from '../components/notifications-drawer';
+import { ParticipantHeaderActions } from './header-actions';
 
 import type { MainSectionProps } from '../core/main-section';
 import type { HeaderSectionProps } from '../core/header-section';
 import type { LayoutSectionProps } from '../core/layout-section';
-import { Typography, Button } from '@mui/material';
-import { ParticipantAccountDrawer } from '../components/participant/participant-account-drawer';
-import { LiveFollowDialog } from 'src/app/participant/components/live-follow-dialog';
-import { useParticipantStatus } from 'src/contexts/participant-context';
-import { BadgeButton } from 'src/app/participant/components/badge-button';
-import { usePathname } from 'src/routes/hooks';
-import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-/**
- * Props de base pour le layout, héritées de LayoutSectionProps
- */
 type LayoutBaseProps = Pick<LayoutSectionProps, 'sx' | 'children' | 'cssVars'>;
 
-/**
- * Props pour le layout dashboard de l'espace participant
- */
-export type DashboardLayoutProps = LayoutBaseProps & {
-  /** Breakpoint pour les requêtes de layout responsive */
+export type ParticipantLayoutProps = LayoutBaseProps & {
   layoutQuery?: Breakpoint;
-  /** Props pour personnaliser les différentes sections du layout */
   slotProps?: {
-    /** Props pour la section header */
     header?: HeaderSectionProps;
-    /** Props pour la navigation */
     nav?: {
-      /** Données de navigation personnalisées */
       data?: NavSectionProps['data'];
     };
-    /** Props pour la section principale */
     main?: MainSectionProps;
   };
 };
 
-/**
- * Layout principal pour l'espace Participant
- * Gère la structure générale avec header, navigation latérale et contenu principal
- */
 export function ParticipantLayout({
   sx,
   cssVars,
   children,
   slotProps,
   layoutQuery = 'lg',
-}: DashboardLayoutProps) {
+}: ParticipantLayoutProps) {
   const theme = useTheme();
-  const settings = useSettingsContext();
-  const { status } = useParticipantStatus();
   const pathname = usePathname();
 
-  const navVars = dashboardNavColorVars(theme, settings.state.navColor, 'vertical');
+  const settings = useSettingsContext();
+
+  const navVars = dashboardNavColorVars(theme, settings.state.navColor, settings.state.navLayout);
+
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
-  const [openLiveDialog, setOpenLiveDialog] = useState(false);
 
-  const navData = useParticipantNavData();
+  // Utilise la navigation dynamique du participant
+  const dynamicNavData = useParticipantNavData();
+  const navData = slotProps?.nav?.data ?? dynamicNavData;
 
-  const shouldShowLiveButton = 
-    pathname.includes('/enligne') && 
-    status.participationType === 'enligne' &&
-    status.hasPaidActivities && 
-    !status.hasConfirmedLiveFollow;
+  // Utilise le menu account spécifique participant
+  const participantAccountData = useParticipantAccountData();
 
   const isNavMini = settings.state.navLayout === 'mini';
+  const isNavHorizontal = settings.state.navLayout === 'horizontal';
   const isNavVertical = isNavMini || settings.state.navLayout === 'vertical';
 
-  /**
-   * Rendu de la section header avec logo, menu mobile et compte utilisateur
-   */
   const renderHeader = () => {
     const headerSlotProps: HeaderSectionProps['slotProps'] = {
       container: {
         maxWidth: false,
         sx: {
-          px: { [layoutQuery]: 5 },
-          height: { [layoutQuery]: '64px' },
+          ...(isNavVertical && { px: { [layoutQuery]: 5 } }),
+          ...(isNavHorizontal && {
+            bgcolor: 'var(--layout-nav-bg)',
+            height: { [layoutQuery]: 'var(--layout-nav-horizontal-height)' },
+            [`& .${iconButtonClasses.root}`]: { color: 'var(--layout-nav-text-secondary-color)' },
+          }),
         },
       },
     };
 
     const headerSlots: HeaderSectionProps['slots'] = {
+      topArea: (
+        <Alert severity="info" sx={{ display: 'none', borderRadius: 0 }}>
+          Espace Participant - EventQuorum
+        </Alert>
+      ),
+      bottomArea: isNavHorizontal ? (
+        <NavHorizontal data={navData} layoutQuery={layoutQuery} cssVars={navVars.section} />
+      ) : null,
       leftArea: (
         <>
+          {/** @slot Nav mobile */}
           <MenuButton
             onClick={onOpen}
-            sx={{ 
-              mr: 1, 
-              ml: -1, 
-              [theme.breakpoints.up(layoutQuery)]: { display: 'none' } 
-            }}
+            sx={{ mr: 1, ml: -1, [theme.breakpoints.up(layoutQuery)]: { display: 'none' } }}
           />
           <NavMobile data={navData} open={open} onClose={onClose} cssVars={navVars.section} />
+
+          {/** @slot Logo */}
+          {isNavHorizontal && (
+            <Logo
+              sx={{
+                display: 'none',
+                [theme.breakpoints.up(layoutQuery)]: { display: 'inline-flex' },
+              }}
+            />
+          )}
+
+          {/** @slot Divider */}
+          {isNavHorizontal && (
+            <VerticalDivider sx={{ [theme.breakpoints.up(layoutQuery)]: { display: 'flex' } }} />
+          )}
+
+          {/** @slot Workspace - Remplacé par titre participant */}
+          {/* <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'var(--layout-nav-text-primary-color)',
+              fontSize: '1.1rem',
+              fontWeight: 500,
+              px: 1,
+            }}
+          >
+            Espace Participant
+          </Box> */}
         </>
       ),
       rightArea: (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
-          {/* DEBUG: Ajoutons des logs pour comprendre le problème */}
-          {(() => {
-            console.log('DEBUG Layout - pathname:', pathname);
-            console.log('DEBUG Layout - status.hasConfirmedPresence:', status.hasConfirmedPresence);
-            console.log('DEBUG Layout - shouldShowConfirmButton:', pathname === '/participant' && !status.hasConfirmedPresence);
-            return null;
-          })()}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 0.75 } }}>
+          {/** Actions spécifiques participant selon le niveau */}
+          <ParticipantHeaderActions pathname={pathname} />
 
-          {/* Bouton "Confirmer ma Présence" - affiché seulement sur la page initiale */}
-          {(pathname === '/participant' || pathname === '/participant/') && !status.hasConfirmedPresence && (
-            <Button
-              variant="contained"
-              color="success"
-              size="medium"
-              startIcon={<Iconify icon="solar:calendar-mark-bold" />}
-              onClick={() => {
-                console.log('Bouton Confirmer ma Présence cliqué');
-                window.dispatchEvent(new CustomEvent('openConfirmationDialog'));
-              }}
-              sx={{
-                borderRadius: 1,
-                textTransform: 'none',
-                fontWeight: 600,
-                px: { xs: 2, sm: 3 },
-                py: { xs: 1, sm: 1.5 },
-                fontSize: { xs: '0.775rem', sm: '0.9rem' },
-                boxShadow: (theme) => theme.customShadows.success,
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: (theme) => theme.customShadows.z16,
-                },
-                transition: 'all 0.3s ease',
-              }}
-            >
-              Confirmer ma Présence
-            </Button>
-          )}
+          {/** @slot Language popover - retiré pour participant */}
+          {/* <LanguagePopover data={allLangs} /> */}
 
-          {/* Bouton "Suivre en Direct" pour enligne */}
-          {shouldShowLiveButton && (
-            <Button
-              variant="contained"
-              color="success"
-              size="medium"
-              startIcon={<Iconify icon="solar:videocamera-record-bold" />}
-              onClick={() => setOpenLiveDialog(true)}
-              sx={{
-                textTransform: 'none',
-                fontWeight: 600,
-                px: { xs: 2, sm: 3 },
-                borderRadius: 2,
-                boxShadow: (theme) => theme.customShadows.success,
-                '&:hover': {
-                  transform: 'translateY(-1px)',
-                  boxShadow: (theme) => theme.customShadows.z16,
-                },
-                transition: 'all 0.2s ease',
-                display: { xs: 'none', sm: 'flex' },
-              }}
-            >
-              Suivre en Direct
-            </Button>
-          )}
+          {/** @slot Notifications - gardé */}
+          <NotificationsDrawer data={_notifications} />
 
-          {/* Bouton Badge - affiché après paiement */}
-          <BadgeButton />
+          {/** @slot Settings - retiré pour participant */}
+          {/* <SettingsButton /> */}
 
-          {/* Drawer compte participant */}
-          <ParticipantAccountDrawer data={_accountParticipant} />
+          {/** @slot Account drawer - utilise la config participant */}
+          <AccountDrawer data={participantAccountData} />
         </Box>
       ),
     };
@@ -203,18 +173,15 @@ export function ParticipantLayout({
     return (
       <HeaderSection
         layoutQuery={layoutQuery}
-        disableElevation
+        disableElevation={isNavVertical}
         {...slotProps?.header}
-        slots={headerSlots}
+        slots={{ ...headerSlots, ...slotProps?.header?.slots }}
         slotProps={merge(headerSlotProps, slotProps?.header?.slotProps ?? {})}
         sx={slotProps?.header?.sx}
       />
     );
   };
 
-  /**
-   * Rendu de la navigation latérale verticale
-   */
   const renderSidebar = () => (
     <NavVertical
       data={navData}
@@ -230,33 +197,33 @@ export function ParticipantLayout({
     />
   );
 
-  /**
-   * Rendu du footer
-   */
   const renderFooter = () => null;
 
-  /**
-   * Rendu de la section principale
-   */
   const renderMain = () => <MainSection {...slotProps?.main}>{children}</MainSection>;
 
   return (
     <LayoutSection
+      /** **************************************
+       * @Header
+       *************************************** */
       headerSection={renderHeader()}
-      sidebarSection={renderSidebar()}
+      /** **************************************
+       * @Sidebar
+       *************************************** */
+      sidebarSection={isNavHorizontal ? null : renderSidebar()}
+      /** **************************************
+       * @Footer
+       *************************************** */
       footerSection={renderFooter()}
-      cssVars={{ 
-        ...dashboardLayoutVars(theme), 
-        ...navVars.layout, 
-        ...cssVars 
-      }}
+      /** **************************************
+       * @Styles
+       *************************************** */
+      cssVars={{ ...dashboardLayoutVars(theme), ...navVars.layout, ...cssVars }}
       sx={[
         {
           [`& .${layoutClasses.sidebarContainer}`]: {
             [theme.breakpoints.up(layoutQuery)]: {
-              pl: isNavMini 
-                ? 'var(--layout-nav-mini-width)' 
-                : 'var(--layout-nav-vertical-width)',
+              pl: isNavMini ? 'var(--layout-nav-mini-width)' : 'var(--layout-nav-vertical-width)',
               transition: theme.transitions.create(['padding-left'], {
                 easing: 'var(--layout-transition-easing)',
                 duration: 'var(--layout-transition-duration)',
@@ -268,12 +235,7 @@ export function ParticipantLayout({
       ]}
     >
       {renderMain()}
-      
-      {/* Dialog "Suivre en Direct" */}
-      <LiveFollowDialog 
-        open={openLiveDialog} 
-        onClose={() => setOpenLiveDialog(false)} 
-      />
     </LayoutSection>
   );
 }
+

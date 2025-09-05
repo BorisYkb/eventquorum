@@ -1,13 +1,14 @@
+//src/app/organisateur/gestionparticipant/page.tsx
 import type { Metadata } from 'next';
 
 import { CONFIG } from 'src/global-config';
 
-import { ComingSoonView } from 'src/sections/coming-soon/view';
+import ParticipantManagementPage from 'src/app/organisateur/gestionparticipant/gestionparticipant-home/participant-management-home';
 
 // ----------------------------------------------------------------------
 
 export const metadata: Metadata = { title: `Coming soon - ${CONFIG.appName}` };
 
 export default function Page() {
-    return <ComingSoonView />;
+    return <ParticipantManagementPage />;
 }

@@ -1,3 +1,6 @@
+//src/routes/paths.ts
+
+import { tr } from 'date-fns/locale';
 import { kebabCase } from 'es-toolkit';
 
 import { _id, _postTitles } from 'src/_mock/assets';
@@ -14,7 +17,10 @@ const ROOTS = {
   DASHBOARD: '/dashboard',
   ADMIN: '/admin',
   ORGANISATEUR: '/organisateur',
-  PARTICIPANT: '/participant',
+  SUPERVISEUR: '/superviseur',
+  INTERVENANT: '/intervenant',
+  GUICHET: '/guichet',
+  OPERATEUR: '/operateur',
 };
 
 // ----------------------------------------------------------------------
@@ -115,33 +121,55 @@ export const paths = {
       detailevent: (name: string) => `${ROOTS.ADMIN}/phototheque/detailevent/${kebabCase(name)}`,
     }
   },
-
-  // ESPACE PARTICIPANT
-  participant: {
-    root: '/participant',
-    enligne: {
-      root: '/participant/enligne',
-      activites: '/participant/enligne/activites',
-      mesinteractions: '/participant/enligne/mesinteractions',
+  // ESPACE SUPERVISEUR
+  superviseur: {
+    root: ROOTS.SUPERVISEUR,
+    accueil: `${ROOTS.SUPERVISEUR}/accueil`,
+    PARTICIPANTS: {
+      root: `${ROOTS.SUPERVISEUR}/participants`,
+      demandes: `${ROOTS.SUPERVISEUR}/participants/demandes`,
+      invites: `${ROOTS.SUPERVISEUR}/participants/invites`,
+      listes: `${ROOTS.SUPERVISEUR}/participants/listes`,
     },
-    enpresentiel: {
-      root: '/participant/enpresentiel',
-      activites: '/participant/enpresentiel/activites',
-      resume: '/participant/enpresentiel/activites/resume',
-      paiement: '/participant/enpresentiel/paiement',
-      mesinteractions: '/participant/enpresentiel/mesinteractions',
-    }
+    ACTIVITES: {
+      root: `${ROOTS.SUPERVISEUR}/activites`
+    },
+    ENQUETES: {
+      root: `${ROOTS.SUPERVISEUR}/enquetes`,
+    },
   },
 
-  
+  // ESPACE INTERVENANT
+  intervenant: {
+    root: ROOTS.INTERVENANT,
+    ACTIVITES: {
+      root: `${ROOTS.INTERVENANT}/activites`,
+      detail: (id: string) => `${ROOTS.INTERVENANT}/activites/${id}`,
+      edit: (id: string) => `${ROOTS.INTERVENANT}/activites/${id}/edit`,
+    },
+    ENQUETES: {
+      root: `${ROOTS.INTERVENANT}/enquetes`,
+      detail: (id: string) => `${ROOTS.INTERVENANT}/enquetes/${id}`,
+      resultats: (id: string) => `${ROOTS.INTERVENANT}/enquetes/${id}/resultats`,
+    },
+  },
   // ESPACE ORGANISATEUR
   organisateur: {
     root: ROOTS.ORGANISATEUR,
     gestionevent: {
       root: `${ROOTS.ORGANISATEUR}/gestionevent`,
+      newactivity: `${ROOTS.ORGANISATEUR}/gestionevent/newactivity`,
+      eventfinancialsituation: {
+        root: `${ROOTS.ORGANISATEUR}/gestionevent/eventfinancialsituation`,
+        perboxoffice: (id: string) =>`${ROOTS.ORGANISATEUR}/gestionevent/eventfinancialsituation/boxoffice/${id}`
+      },
+      edit: (id: string) => `${ROOTS.ORGANISATEUR}/gestionevent/${id}/editactivity`,
     },
     gestionparticipant: {
       root: `${ROOTS.ORGANISATEUR}/gestionparticipant`,
+      add: `${ROOTS.ORGANISATEUR}/gestionparticipant/add-new`,
+      edit: (id: string) => `${ROOTS.ORGANISATEUR}/gestionparticipant/edit/${id}`,
+      consultation: `${ROOTS.ORGANISATEUR}/gestionparticipant/consultation`,
     },
     gestionhabilitations: {
       root: `${ROOTS.ORGANISATEUR}/gestionhabilitations`,
@@ -150,6 +178,36 @@ export const paths = {
       root: `${ROOTS.ORGANISATEUR}/gestionenquete`,
     },
   },
+
+  // GUICHET
+  guichet: {
+    root: ROOTS.GUICHET,
+    transactions: {
+      root: `${ROOTS.GUICHET}/transactions`,
+      new: `${ROOTS.GUICHET}/transactions/new`,
+      detail: (id: string) => `${ROOTS.GUICHET}/transactions/${id}`,
+    },
+  },
+
+  // OPERATEUR
+operateur: {
+  root: ROOTS.OPERATEUR,
+  ADMISSION_ENTREE: {
+    root: `${ROOTS.OPERATEUR}/admission-entree`,
+    scan: `${ROOTS.OPERATEUR}/admission-entree/scan`,
+    liste: `${ROOTS.OPERATEUR}/admission-entree/liste`,
+    participant: (id: string) => `${ROOTS.OPERATEUR}/admission-entree/participant/${id}`,
+    recherche: `${ROOTS.OPERATEUR}/admission-entree/recherche`,
+  },
+  ADMISSION_ACTIVITE: {
+    root: `${ROOTS.OPERATEUR}/admission-activite`,
+    scan: `${ROOTS.OPERATEUR}/admission-activite/scan`,
+    liste: `${ROOTS.OPERATEUR}/admission-activite/liste`,
+    activite: (id: string) => `${ROOTS.OPERATEUR}/admission-activite/activite/${id}`,
+    participant: (activityId: string, participantId: string) => `${ROOTS.OPERATEUR}/admission-activite/activite/${activityId}/participant/${participantId}`,
+    recherche: `${ROOTS.OPERATEUR}/admission-activite/recherche`,
+  }
+},
   // DASHBOARD
   dashboard: {
     root: ROOTS.DASHBOARD,

@@ -1,107 +1,160 @@
+// src/layouts/nav-config-participant.tsx
 import type { NavSectionProps } from 'src/components/nav-section';
-
-import { paths } from 'src/routes/paths';
-
-import { CONFIG } from 'src/global-config';
-
-import { Label } from 'src/components/label';
+import { usePathname } from 'next/navigation';
 import { Iconify } from 'src/components/iconify';
-import { SvgColor } from 'src/components/svg-color';
 
 // ----------------------------------------------------------------------
 
 /**
- * Fonction utilitaire pour créer les icônes SVG de la navigation
- * @param name - Nom du fichier d'icône (sans extension)
- * @returns Composant SvgColor configuré
+ * Configuration dynamique de navigation pour l'espace participant
+ * Basée sur le pathname actuel pour afficher les onglets appropriés
  */
-const icon = (name: string) => (
-    <SvgColor src={`${CONFIG.assetsDir}/assets/icons/navbar/${name}.svg`} />
-);
+export function useParticipantNavData(): NavSectionProps['data'] {
+  const pathname = usePathname();
 
-/**
- * Collection d'icônes disponibles pour la navigation de l'espace participant
- * Utilise les icônes SVG stockées dans le dossier assets/icons/navbar/
- */
-const ICONS = {
-    // Icônes principales
-    job: icon('ic-job'),
-    blog: icon('ic-blog'),
-    chat: icon('ic-chat'),
-    mail: icon('ic-mail'),
-    user: icon('ic-user'),
-    file: icon('ic-file'),
-    lock: icon('ic-lock'),
-    tour: icon('ic-tour'),
-    order: icon('ic-order'),
-    label: icon('ic-label'),
-    blank: icon('ic-blank'),
-    kanban: icon('ic-kanban'),
-    folder: icon('ic-folder'),
-    course: icon('ic-course'),
-    banking: icon('ic-banking'),
-    booking: icon('ic-booking'),
-    invoice: icon('ic-invoice'),
-    product: icon('ic-product'),
-    calendar: icon('ic-calendar'),
-    disabled: icon('ic-disabled'),
-    external: icon('ic-external'),
-    menuItem: icon('ic-menu-item'),
-    ecommerce: icon('ic-ecommerce'),
-    analytics: icon('ic-analytics'),
-    dashboard: icon('ic-dashboard'),
-    phototheque: icon('ic-phototheque'),
-    parameter: icon('ic-parameter'),
-    // Icônes spécifiques au participant
-    activities: icon('ic-calendar'), // Réutilisation de l'icône calendrier pour les activités
-    interactions: icon('ic-chat'),   // Icône chat pour les interactions
-    home: icon('ic-dashboard'),      // Icône dashboard pour l'accueil
-};
-
-// ----------------------------------------------------------------------
-
-/**
- * Configuration de la navigation pour l'espace Participant
- * Définit la structure du menu latéral avec les trois sections principales :
- * - Accueil : Dashboard et profil du participant
- * - Activités : Gestion des activités et inscriptions
- * - Mes Interactions : Communications et interactions
- */
-export const participantNavData: NavSectionProps['data'] = [
-    {
+  // Navigation dynamique basée sur la progression du participant
+  if (pathname === '/participant' || pathname === '/participant/') {
+    // Niveau initial - seulement Accueil
+    return [
+      {
+        subheader: 'Navigation',
         items: [
-            {
-                title: 'Accueil',
-                path: paths.participant.root,
-                icon: ICONS.home,
-                info: (
-                    <Label color="info" variant="inverted">
-                        Dashboard
-                    </Label>
-                ),
-            },
-            {
-                title: 'Activités',
-                path: paths.participant.enligne.activites, // ou utilisez une logique conditionnelle
-                icon: ICONS.activities,
-                info: (
-                    <Label color="success" variant="inverted">
-                        Mes événements
-                    </Label>
-                ),
-            },
-            {
-                title: 'Mes Interactions',
-                path: paths.participant.enligne.mesinteractions, // ou utilisez une logique conditionnelle
-                icon: ICONS.interactions,
-                info: (
-                    <Label color="warning" variant="inverted">
-                        Communication
-                    </Label>
-                ),
-            },
+          { 
+            title: 'Accueil', 
+            path: '/participant', 
+            icon: <Iconify width={22} icon="solar:home-2-bold-duotone" /> 
+          },
         ],
-    },
-];
+      },
+    ];
+  }
 
-export { ICONS };
+  if (pathname.startsWith('/participant/enpresentiel') && !pathname.includes('/payer')) {
+    // Niveau présentiel confirmé - Accueil + Activités
+    return [
+      {
+        subheader: 'Navigation',
+        items: [
+          { 
+            title: 'Accueil', 
+            path: '/participant/enpresentiel', 
+            icon: <Iconify width={22} icon="solar:home-2-bold-duotone" /> 
+          },
+          { 
+            title: 'Activités', 
+            path: '/participant/enpresentiel/activites', 
+            icon: <Iconify width={22} icon="solar:calendar-bold-duotone" /> 
+          },
+        ],
+      },
+    ];
+  }
+
+  if (pathname.startsWith('/participant/enligne') && !pathname.includes('/payer')) {
+    // Niveau en ligne confirmé - Accueil + Activités
+    return [
+      {
+        subheader: 'Navigation',
+        items: [
+          { 
+            title: 'Accueil', 
+            path: '/participant/enligne', 
+            icon: <Iconify width={22} icon="solar:home-2-bold-duotone" /> 
+          },
+          { 
+            title: 'Activités', 
+            path: '/participant/enligne/activites', 
+            icon: <Iconify width={22} icon="solar:calendar-bold-duotone" /> 
+          },
+        ],
+      },
+    ];
+  }
+
+  if (pathname.startsWith('/participant/enpresentiel/payer')) {
+    // Niveau présentiel payé - Accueil + Activités + Mes interactions
+    return [
+      {
+        subheader: 'Navigation',
+        items: [
+          { 
+            title: 'Accueil', 
+            path: '/participant/enpresentiel/payer', 
+            icon: <Iconify width={22} icon="solar:home-2-bold-duotone" /> 
+          },
+          { 
+            title: 'Activités', 
+            path: '/participant/enpresentiel/payer/activites', 
+            icon: <Iconify width={22} icon="solar:calendar-bold-duotone" /> 
+          },
+          { 
+            title: 'Mes interactions', 
+            path: '/participant/enpresentiel/payer/mesinteractions', 
+            icon: <Iconify width={22} icon="solar:chat-round-call-bold-duotone" /> 
+          },
+        ],
+      },
+    ];
+  }
+
+  if (pathname.startsWith('/participant/enligne/payer') && !pathname.includes('/suivredirecte')) {
+    // Niveau en ligne payé (avant suivi direct) - Accueil + Activités
+    return [
+      {
+        subheader: 'Navigation',
+        items: [
+          { 
+            title: 'Accueil', 
+            path: '/participant/enligne/payer', 
+            icon: <Iconify width={22} icon="solar:home-2-bold-duotone" /> 
+          },
+          { 
+            title: 'Activités', 
+            path: '/participant/enligne/payer/activites', 
+            icon: <Iconify width={22} icon="solar:calendar-bold-duotone" /> 
+          },
+        ],
+      },
+    ];
+  }
+
+  if (pathname.startsWith('/participant/enligne/payer/suivredirecte')) {
+    // Niveau en ligne avec suivi direct - Accueil + Activités + Mes interactions
+    return [
+      {
+        subheader: 'Navigation',
+        items: [
+          { 
+            title: 'Accueil', 
+            path: '/participant/enligne/payer/suivredirecte', 
+            icon: <Iconify width={22} icon="solar:home-2-bold-duotone" /> 
+          },
+          { 
+            title: 'Activités', 
+            path: '/participant/enligne/payer/suivredirecte/activites', 
+            icon: <Iconify width={22} icon="solar:calendar-bold-duotone" /> 
+          },
+          { 
+            title: 'Mes interactions', 
+            path: '/participant/enligne/payer/suivredirecte/mesinteractions', 
+            icon: <Iconify width={22} icon="solar:chat-round-call-bold-duotone" /> 
+          },
+        ],
+      },
+    ];
+  }
+
+  // Configuration par défaut (fallback)
+  return [
+    {
+      subheader: 'Navigation',
+      items: [
+        { 
+          title: 'Accueil', 
+          path: '/participant', 
+          icon: <Iconify width={22} icon="solar:home-2-bold-duotone" /> 
+        },
+      ],
+    },
+  ];
+}

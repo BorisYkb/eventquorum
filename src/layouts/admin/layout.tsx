@@ -1,3 +1,5 @@
+//src/layouts/admin/layout.tsx
+
 'use client';
 
 import type { Breakpoint } from '@mui/material/styles';

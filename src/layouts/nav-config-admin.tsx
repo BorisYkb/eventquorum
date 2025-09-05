@@ -1,3 +1,5 @@
+//src/layouts/nav-config-admin.tsx
+
 import type { NavSectionProps } from 'src/components/nav-section';
 
 import { paths } from 'src/routes/paths';

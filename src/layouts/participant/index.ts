@@ -1,4 +1,3 @@
-//src/layouts/participant/index.ts
+// src/layouts/participant/index.ts
 export * from './layout';
-
-export * from './content';
+export * from './header-actions';
